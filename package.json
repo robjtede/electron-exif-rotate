@@ -28,9 +28,11 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "debug": "^3.1.0",
     "sharp": "^0.20.5"
   },
   "devDependencies": {
+    "@types/debug": "0.0.30",
     "@types/sharp": "^0.17.9",
     "eclint": "^2.8.0",
     "electron": "^3.0.0-beta.2",

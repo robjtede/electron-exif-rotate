@@ -1,9 +1,15 @@
+import { readFileSync } from 'fs'
 import { net, protocol } from 'electron'
 import sharp = require('sharp')
+import Debug = require('debug')
+
+const debug = Debug('electron-exif-rotate')
 
 export function install() {
   protocol.interceptBufferProtocol('https', (req, callback) => {
+    debug(req)
     const request = net.request(req)
+
     request.on('response', res => {
       const chunks: Buffer[] = []
 
@@ -28,6 +34,14 @@ export function install() {
         }
       })
     })
+
+    if (req.uploadData) {
+      req.uploadData.forEach(part => {
+        debug(part)
+        if (part.bytes) request.write(part.bytes)
+        else if (part.file) request.write(readFileSync(part.file))
+      })
+    }
 
     request.end()
   })
