@@ -1,6 +1,6 @@
 {
   "name": "electron-exif-rotate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Automatically rotate images based on EXIF metadata in Electron windows",
   "main": "./index.js",
   "types": "./index.d.js",
