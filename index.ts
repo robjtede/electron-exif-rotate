@@ -1,14 +1,16 @@
-import { readFileSync } from 'fs'
-import { net, protocol } from 'electron'
-import sharp = require('sharp')
 import Debug = require('debug')
+import { net, protocol } from 'electron'
+import { readFileSync } from 'fs'
+import sharp = require('sharp')
 
 const debug = Debug('electron-exif-rotate')
 
 export function install() {
   protocol.interceptBufferProtocol('https', (req, callback) => {
-    debug(req)
+    debug('request', req)
+
     const request = net.request(req)
+    request.chunkedEncoding = true
 
     request.on('response', res => {
       const chunks: Buffer[] = []
@@ -17,22 +19,29 @@ export function install() {
         chunks.push(Buffer.from(chunk))
       })
 
-      res.on('end', () => {
+      res.on('end', async () => {
         const file = Buffer.concat(chunks)
 
         if (
           'content-type' in res.headers &&
-          res.headers['content-type'].includes('image/jpeg')
+          (res.headers['content-type'].includes('image/jpeg') ||
+            res.headers['content-type'].includes('image/tiff'))
         ) {
-          sharp(file)
+          const buffer = await sharp(file)
+            .withMetadata()
             .rotate()
             .toBuffer()
-            .then(callback)
-            .catch(console.error)
+
+          callback(buffer)
         } else {
           callback(file)
         }
       })
+    })
+
+    request.on('error', err => {
+      debug('request error', err)
+      callback()
     })
 
     if (req.uploadData) {
