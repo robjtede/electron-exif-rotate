@@ -8,9 +8,9 @@ const sharp = require('sharp')
 const debug = Debug('electron-exif-rotate')
 function install() {
   electron_1.protocol.interceptBufferProtocol('https', (req, callback) => {
-    debug('request', req)
+    debug('intercepted request', req)
     const request = electron_1.net.request(req)
-    request.chunkedEncoding = true
+    // request.chunkedEncoding = true
     request.on('response', res => {
       const chunks = []
       res.on('data', chunk => {
@@ -41,9 +41,12 @@ function install() {
     })
     if (req.uploadData) {
       req.uploadData.forEach(part => {
-        debug(part)
-        if (part.bytes) request.write(part.bytes)
-        else if (part.file) request.write(fs_1.readFileSync(part.file))
+        if (part.bytes) {
+          debug(part.bytes.toString())
+          request.write(part.bytes)
+        } else if (part.file) {
+          request.write(fs_1.readFileSync(part.file))
+        }
       })
     }
     request.end()

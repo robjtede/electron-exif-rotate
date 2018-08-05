@@ -7,10 +7,10 @@ const debug = Debug('electron-exif-rotate')
 
 export function install() {
   protocol.interceptBufferProtocol('https', (req, callback) => {
-    debug('request', req)
+    debug('intercepted request', req)
 
     const request = net.request(req)
-    request.chunkedEncoding = true
+    // request.chunkedEncoding = true
 
     request.on('response', res => {
       const chunks: Buffer[] = []
@@ -46,9 +46,12 @@ export function install() {
 
     if (req.uploadData) {
       req.uploadData.forEach(part => {
-        debug(part)
-        if (part.bytes) request.write(part.bytes)
-        else if (part.file) request.write(readFileSync(part.file))
+        if (part.bytes) {
+          debug(part.bytes.toString())
+          request.write(part.bytes)
+        } else if (part.file) {
+          request.write(readFileSync(part.file))
+        }
       })
     }
 
